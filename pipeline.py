@@ -144,10 +144,15 @@ if not df_included.empty:
     print(df_included["Prioridade_Pedagogia"].value_counts())
 
 print("\n--- FLUXOGRAMA PRISMA-ScR (DADOS) ---")
-print(f"Identificados: {len(df_raw)}")
+_identified = n_identified_raw if "n_identified_raw" in globals() else len(df_raw)
+_excluded_date = n_excluded_date if "n_excluded_date" in globals() else 0
+print(f"Identificados (bases): {_identified}")
+if _excluded_date:
+    print(f"Excluídos por data: {_excluded_date}")
+print(f"Após filtro de data: {len(df_raw)}")
 print(f"Duplicatas Removidas: {len(df_raw) - len(df_screen)}")
 print(f"Triados por Título/Resumo: {len(df_screen)}")
-print(f"Excluídos: {len(df_screen) - len(df_included)}")
+print(f"Excluídos (triagem): {len(df_screen) - len(df_included)}")
 print(f"Incluídos para Leitura Completa: {len(df_included)}")
 """
 )
@@ -215,6 +220,8 @@ SEARCH_SOURCES = [
 ]
 PUSH_TO_ZOTERO = os.getenv("PUSH_TO_ZOTERO", "true").strip().lower() in {{"1", "true", "yes"}}
 SCREENING_MIN_SCORE = int(os.getenv("SCREENING_MIN_SCORE", "5"))
+PUBLICATION_DATE_FROM = os.getenv("PUBLICATION_DATE_FROM", "2010-01-01").strip()
+PUBLICATION_DATE_TO = os.getenv("PUBLICATION_DATE_TO", "2026-03-20").strip()
 OPENALEX_MAILTO = os.getenv("OPENALEX_MAILTO", "passive_bci@local.dev").strip()
 NCBI_EMAIL = os.getenv("NCBI_EMAIL", OPENALEX_MAILTO).strip()
 HTTP_TIMEOUT = 45
@@ -222,6 +229,7 @@ HTTP_TIMEOUT = 45
 print("Ambiente configurado.")
 print(f"Query: {{SEARCH_QUERY}}")
 print(f"Fontes: {{SEARCH_SOURCES}} | limite={{SEARCH_LIMIT}} | score mínimo={{SCREENING_MIN_SCORE}}")
+print(f"Período de publicação: {{PUBLICATION_DATE_FROM}} a {{PUBLICATION_DATE_TO}}")
 """
             ),
         },
@@ -230,8 +238,8 @@ print(f"Fontes: {{SEARCH_SOURCES}} | limite={{SEARCH_LIMIT}} | score mínimo={{S
             "metadata": {},
             "source": [
                 "### Célula 2: Busca automatizada (OpenAlex + PubMed)\n",
-                "> Query orientada a: passive BCI + biomarcador quantitativo + validação + "
-                "(pedagogia | reabilitação | psicologia | IHC).\n",
+                "> Query + filtro de data (`PUBLICATION_DATE_FROM` / `PUBLICATION_DATE_TO` no `.env`), "
+                "como no artigo CBEB (2010–mar/2026).\n",
             ],
         },
         {
@@ -248,11 +256,51 @@ def _clean_doi(doi: str) -> str:
     return doi.strip()
 
 
-def search_openalex(query: str, limit: int) -> list[dict]:
+def _year_bounds(date_from: str, date_to: str) -> tuple[int | None, int | None]:
+    y_from = int(date_from[:4]) if date_from and len(date_from) >= 4 and date_from[:4].isdigit() else None
+    y_to = int(date_to[:4]) if date_to and len(date_to) >= 4 and date_to[:4].isdigit() else None
+    return y_from, y_to
+
+
+def _pubmed_date(d: str) -> str:
+    # Converte YYYY-MM-DD para YYYY/MM/DD (E-utilities)
+    if not d:
+        return ""
+    return d.replace("-", "/")
+
+
+def _record_year(record: dict) -> int | None:
+    raw = str(record.get("publicationYear") or "").strip()
+    if len(raw) >= 4 and raw[:4].isdigit():
+        return int(raw[:4])
+    return None
+
+
+def _record_in_publication_range(record: dict, date_from: str, date_to: str) -> bool:
+    y_from, y_to = _year_bounds(date_from, date_to)
+    year = _record_year(record)
+    if year is None:
+        return False
+    if y_from is not None and year < y_from:
+        return False
+    if y_to is not None and year > y_to:
+        return False
+    return True
+
+
+def filter_dataframe_by_publication_date(df: pd.DataFrame, date_from: str, date_to: str) -> pd.DataFrame:
+    if df.empty or (not date_from and not date_to):
+        return df
+    mask = df.apply(lambda r: _record_in_publication_range(r.to_dict(), date_from, date_to), axis=1)
+    return df[mask].copy().reset_index(drop=True)
+
+
+def search_openalex(query: str, limit: int, date_from: str = "", date_to: str = "") -> list[dict]:
     records = []
-    per_page = min(50, limit)
+    per_page = min(50, max(limit, 50))
     cursor = "*"
     headers = {"User-Agent": f"passive_bci/1.0 (mailto:{OPENALEX_MAILTO})"}
+    y_from, y_to = _year_bounds(date_from, date_to)
 
     while len(records) < limit:
         url = (
@@ -262,10 +310,23 @@ def search_openalex(query: str, limit: int) -> list[dict]:
             f"&cursor={quote(cursor)}"
             f"&mailto={quote(OPENALEX_MAILTO)}"
         )
+        if date_from and date_to:
+            url += f"&filter=from_publication_date:{date_from},to_publication_date:{date_to}"
+        elif date_from:
+            url += f"&filter=from_publication_date:{date_from}"
+        elif date_to:
+            url += f"&filter=to_publication_date:{date_to}"
+
         resp = requests.get(url, headers=headers, timeout=HTTP_TIMEOUT)
         resp.raise_for_status()
         payload = resp.json()
         for work in payload.get("results", []):
+            year = work.get("publication_year")
+            if y_from is not None and (year is None or year < y_from):
+                continue
+            if y_to is not None and (year is None or year > y_to):
+                continue
+
             doi = _clean_doi(work.get("doi") or "")
             abstract = ""
             inv = work.get("abstract_inverted_index") or {}
@@ -276,7 +337,6 @@ def search_openalex(query: str, limit: int) -> list[dict]:
                         positions.append((i, word))
                 abstract = " ".join(w for _, w in sorted(positions))
 
-            year = work.get("publication_year")
             primary = work.get("primary_location") or {}
             records.append({
                 "key": f"oa:{work.get('id', '').rsplit('/', 1)[-1]}",
@@ -300,12 +360,18 @@ def search_openalex(query: str, limit: int) -> list[dict]:
     return records[:limit]
 
 
-def search_pubmed(query: str, limit: int) -> list[dict]:
+def search_pubmed(query: str, limit: int, date_from: str = "", date_to: str = "") -> list[dict]:
     base = "https://eutils.ncbi.nlm.nih.gov/entrez/eutils"
     search_url = (
         f"{base}/esearch.fcgi?db=pubmed&retmode=json"
         f"&retmax={limit}&term={quote(query)}&email={quote(NCBI_EMAIL)}"
     )
+    if date_from:
+        search_url += f"&mindate={quote(_pubmed_date(date_from))}"
+    if date_to:
+        search_url += f"&maxdate={quote(_pubmed_date(date_to))}"
+    if date_from or date_to:
+        search_url += "&datetype=pdat"
     search = requests.get(search_url, timeout=HTTP_TIMEOUT)
     search.raise_for_status()
     ids = (search.json().get("esearchresult") or {}).get("idlist") or []
@@ -366,9 +432,13 @@ all_records = []
 for src_name in SEARCH_SOURCES:
     try:
         if src_name == "openalex":
-            found = search_openalex(SEARCH_QUERY, SEARCH_LIMIT)
+            found = search_openalex(
+                SEARCH_QUERY, SEARCH_LIMIT, PUBLICATION_DATE_FROM, PUBLICATION_DATE_TO
+            )
         elif src_name == "pubmed":
-            found = search_pubmed(SEARCH_QUERY, SEARCH_LIMIT)
+            found = search_pubmed(
+                SEARCH_QUERY, SEARCH_LIMIT, PUBLICATION_DATE_FROM, PUBLICATION_DATE_TO
+            )
         else:
             print(f"Fonte ignorada: {src_name}")
             continue
@@ -382,7 +452,18 @@ if df_search.empty:
     df_search = pd.DataFrame(
         columns=["key", "title", "abstract", "publicationYear", "doi", "itemType", "url", "source"]
     )
-print(f"Total bruto das buscas: {len(df_search)}")
+
+n_identified_raw = len(df_search)
+df_search = filter_dataframe_by_publication_date(
+    df_search, PUBLICATION_DATE_FROM, PUBLICATION_DATE_TO
+)
+n_excluded_date = n_identified_raw - len(df_search)
+
+print(f"Identificados (bruto): {n_identified_raw}")
+print(
+    f"Excluídos por data ({PUBLICATION_DATE_FROM} a {PUBLICATION_DATE_TO}): {n_excluded_date}"
+)
+print(f"Total após filtro de data: {len(df_search)}")
 df_search.head(3)
 """
             ),

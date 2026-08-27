@@ -1,0 +1,7 @@
+.venv/
+__pycache__/
+*.pyc
+.ipynb_checkpoints/
+Matriz_Mapeamento_PRISMA.xlsx
+export_zotero.csv
+.env

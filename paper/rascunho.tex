@@ -7,7 +7,6 @@
 \usepackage{cite}
 \usepackage{booktabs}
 \usepackage{multirow}
-\usepackage{hyperref}
 
 \sloppy
 
@@ -25,206 +24,126 @@
 \maketitle
 
 \begin{abstract}
-Passive brain--computer interfaces (pBCIs) decode covert cognitive and affective states to enable neuroadaptive systems without requiring explicit user commands. This scoping review maps neurophysiological biomarkers, machine learning pipelines, and methodological validity criteria reported in studies that construct or validate quantitative EEG-based mental-state estimators within passive BCI frameworks. Following PRISMA-ScR guidelines, we searched OpenAlex and PubMed (January 2010--March 2026), screened records with a priori inclusion rules and a structured relevance score, and extracted features across temporal (ERPs), spectral (theta, alpha, mu, beta), spatial, and connectivity domains. Emphasis is placed on cross-validation practices that account for temporal dependence, calibration and cross-task generalization, and the neurophysiological interpretability of linear and nonlinear decoders. Of 82 unique records screened, 13 were pre-selected for full-text synthesis; preliminary mapping indicates dominant spectral ratios and engagement indices, heterogeneous validation rigor, and limited reporting of prefrontal channels and pedagogical applications.
+Passive brain--computer interfaces decode covert cognitive and affective states to support neuroadaptive systems without explicit user commands. We conducted a scoping review following PRISMA-ScR, searching OpenAlex and PubMed through March 2026. Eighty-two unique records were screened; thirteen were pre-selected for full-text synthesis. Preliminary reading highlights spectral-ratio biomarkers for driving drowsiness, methodological lessons from fNIRS preprocessing, and EEG network-topology features for mild cognitive impairment, alongside heterogeneous validation rigor and limited prefrontal-channel reporting.
 \end{abstract}
 
 \begin{resumo}
-Interfaces cérebro-computador passivas (pBCIs) decodificam estados cognitivos e afetivos implícitos para viabilizar sistemas neuroadaptativos sem exigir comandos voluntários explícitos. Esta revisão de escopo mapeia biomarcadores neurofisiológicos, \textit{pipelines} de aprendizado de máquina e critérios de validade metodológica em estudos que constroem ou validam estimadores quantitativos de estados mentais baseados em EEG no paradigma pBCI. Seguindo PRISMA-ScR, buscamos OpenAlex e PubMed (janeiro/2010--março/2026), triamos registros com critérios \textit{a priori} e pontuação estruturada de relevância, e extraímos \textit{features} nos domínios temporal (ERPs), espectral (teta, alfa, mu, beta), espacial e de conectividade. Destacam-se práticas de validação cruzada sensíveis à dependência temporal, generalização entre tarefas e sessões, e interpretabilidade neurofisiológica de decodificadores lineares e não lineares. Dos 82 registros únicos triados, 13 foram pré-selecionados para síntese em texto integral; o mapeamento preliminar indica predominância de razões espectrais e índices de engajamento, rigor de validação heterogêneo e escassa reportagem de canais frontopolar e aplicações pedagógicas.
+Interfaces cérebro-computador passivas decodificam estados cognitivos e afetivos implícitos para viabilizar sistemas neuroadaptativos. Conduzimos revisão de escopo conforme PRISMA-ScR em OpenAlex e PubMed até março de 2026. Oitenta e dois registros únicos foram triados; treze pré-selecionados. A leitura preliminar destaca biomarcadores espectrais para sonolência ao volante, lições metodológicas de pré-processamento fNIRS e \textit{features} de topologia de rede EEG para comprometimento cognitivo leve, além de rigor de validação heterogêneo e escassa reportagem de canais frontopolar.
 \end{resumo}
 
 \section{Introdução}
 
-O monitoramento contínuo de estados cognitivos e afetivos por meio de interfaces cérebro-computador passivas (\textit{passive brain--computer interfaces} --- pBCIs) consolidou-se como eixo central da neuroergonomia e da interação humano-máquina adaptativa~\cite{Arico2017,Zander2016}. Diferentemente dos paradigmas ativos ou reativos, os sistemas passivos inferem informação a partir da atividade cerebral espontânea ou induzida pela tarefa principal, sem sobrecarregar o usuário com comandos voluntários explícitos~\cite{Zander2016}. Esse paradigma viabiliza aplicações em sistemas de alta complexidade e criticidade de segurança --- como aviação, controle de tráfego aéreo (ATM), condução veicular e ambientes clínicos --- nos quais a interface deve adaptar comportamento e funcionalidade ao estado mental real do operador~\cite{Arico2017,Arico2016ATM}.
+O monitoramento contínuo de estados cognitivos e afetivos por meio de interfaces cérebro-computador passivas (\textit{passive brain--computer interfaces}, pBCIs) consolidou-se como eixo central da neuroergonomia e da interação humano-máquina adaptativa~\cite{Arico2017,Zander2016}. Diferentemente dos paradigmas ativos ou reativos, os sistemas passivos inferem informação a partir da atividade cerebral espontânea ou induzida pela tarefa principal, sem sobrecarregar o usuário com comandos voluntários explícitos~\cite{Zander2016}. Esse paradigma viabiliza aplicações em sistemas de alta complexidade e criticidade de segurança --- aviação, controle de tráfego aéreo, condução veicular e ambientes clínicos --- nos quais a interface deve adaptar comportamento e funcionalidade ao estado mental real do operador~\cite{Arico2017,Arico2016ATM,Arif2023}.
 
-Aricò \textit{et al.}~\cite{Arico2017}, em \textit{mini-revisão} sobre pBCI em ambientes operacionais, sintetizaram quatro eixos metodológicos recorrentes: (i)~avaliação de estados mentais por \textit{neurometrics} (EEG e, em menor escala, fNIRS, fMRI, MEG e biosinais periféricos); (ii)~tecnologias pBCI para melhoria da interação humano-máquina em \textit{closed-loop}; (iii)~identificação de \textit{features} eletrofisiológicas (oscilações espectrais, ERPs, conectividade); e (iv)~mensuração de estados mentais por aprendizado de máquina, com recomendações explícitas sobre modelos lineares, kernels, regularização e calibração. Estados como estresse, fadiga mental, sonolência, sobrecarga de trabalho (\textit{mental workload}), frustração e engajamento/atencão aparecem como alvos recorrentes; componentes temporais como P300 (recursos atencionais) e ERN (detecção de erro) exemplificam biomarcadores com potencial operacional~\cite{Arico2017,Blankertz2011}.
+Aricò \textit{et al.}~\cite{Arico2017}, em revisão narrativa sobre pBCI em ambientes operacionais, sintetizaram quatro eixos metodológicos recorrentes: avaliação de estados mentais por neurometrics; tecnologias pBCI para interação humano-máquina em malha fechada; identificação de \textit{features} eletrofisiológicas, incluindo oscilações espectrais, potenciais relacionados a eventos e conectividade; e mensuração de estados mentais por aprendizado de máquina, com recomendações sobre modelos lineares, kernels, regularização e calibração. Estados como estresse, fadiga, sonolência, sobrecarga de trabalho, frustração e engajamento aparecem como alvos recorrentes; componentes temporais como P300 e ERN exemplificam biomarcadores com potencial operacional~\cite{Arico2017,Blankertz2011}.
 
-Contudo, a translação laboratório--campo permanece limitada. Baixa relação sinal-ruído (SNR), artefatos fisiológicos e instrumentais, não estacionariedade do EEG, calibração dependente de tarefa e sessão, e riscos de sobreajuste (\textit{overfitting}) --- frequentemente agravados por validação cruzada que ignora dependência temporal entre janelas adjacentes~\cite{Varoquaux2017} --- comprometem confiabilidade e reprodutibilidade. Adicionalmente, interpretar vetores de peso de classificadores lineares como mapas de ativação neural exige distinção cuidadosa entre modelos diretos, inversos e mapas de sensibilidade~\cite{Haufe2014}; confundir essas quantidades pode levar a conclusões neurofisiológicas espúrias.
+Contudo, a translação do laboratório para contextos ecológicos permanece limitada. Baixa relação sinal-ruído, artefatos, não estacionariedade do EEG, calibração dependente de tarefa e sessão, e riscos de sobreajuste --- frequentemente agravados por validação cruzada que ignora dependência temporal~\cite{Varoquaux2017} --- comprometem confiabilidade e reprodutibilidade. Interpretar vetores de peso de classificadores lineares como mapas de ativação neural exige distinção entre modelos diretos, inversos e mapas de sensibilidade~\cite{Haufe2014}.
 
-Revisões sistemáticas recentes em domínios adjacentes --- como a integração BCI--FES para reabilitação motora~\cite{Faria2026} --- demonstraram que, mesmo em corpora maduros, a reportagem de canais EEG, bandas espectrais e algoritmos de classificação permanece incompleta (respectivamente 90\%, 90\% e 94\% nos 82 estudos incluídos), com predominância de ritmo mu (8--13~Hz), beta (13--30~Hz) e derivações sensorimotoras C3/C4/Cz, enquanto eletrodos frontopolar (Fp1/Fp2) aparecem em apenas 10\% dos trabalhos. Esses achados motivam uma revisão de escopo focada especificamente em \textbf{biomarcadores quantitativos} e \textbf{validação metodológica} no paradigma \textbf{passivo}, incluindo contextos pedagógicos, psicológicos e de reabilitação cognitiva, nos quais a literatura permanece fragmentada.
+Revisões recentes em domínios adjacentes --- como a integração BCI--FES para reabilitação motora~\cite{Faria2026} --- demonstraram reportagem incompleta de canais EEG, bandas espectrais e algoritmos, com predominância de ritmo mu, beta e derivações C3, C4 e Cz, enquanto eletrodos frontopolar (Fp1/Fp2) aparecem em apenas 10\% dos trabalhos. Esses achados motivam uma revisão de escopo focada em biomarcadores quantitativos e validação metodológica no paradigma passivo, incluindo contextos pedagógicos, clínicos e de neuroergonomia.
 
-Este trabalho apresenta uma revisão de escopo conduzida conforme PRISMA-ScR~\cite{Tricco2018}, visando:
-\begin{enumerate}
-    \item mapear biomarcadores e estimadores de estados mentais nos domínios temporal, espectral, espacial e de conectividade em estudos pBCI;
-    \item categorizar arquiteturas de aprendizado de máquina (lineares, baseadas em kernel, Riemannianas e \textit{deep learning}) e procedimentos de construção/validação reportados;
-    \item analisar rigor metodológico na validação cruzada, calibração, generalização entre tarefas/sessões e interpretabilidade neurofisiológica dos decodificadores;
-    \item identificar lacunas de reportagem --- especialmente canais, razões espectrais, \textit{ground truth} e aplicações pedagógicas --- para orientar diretrizes futuras de pesquisa e translação interdisciplinar.
-\end{enumerate}
+Esta revisão caracteriza desenhos de estudo, populações, parâmetros técnicos, biomarcadores, \textit{pipelines} de decodificação e critérios de validade reportados na literatura pBCI, identificando padrões e lacunas que orientem pesquisa futura e diretrizes de reportagem. A síntese detalhada de arquiteturas completas de aprendizado de máquina permanece deliberadamente limitada neste estágio, por depender de extração campo a campo a partir de textos integrais; o presente manuscrito prioriza o mapeamento de biomarcadores, \textit{setups} experimentais e práticas de validação.
 
 \section{Métodos}
 
 \subsection{Desenho do estudo}
 
-Esta revisão de escopo foi conduzida conforme a extensão PRISMA para \textit{scoping reviews} (PRISMA-ScR)~\cite{Tricco2018}, com protocolo, critérios de elegibilidade e estratégia de busca definidos \textit{a priori}, seguindo o arcabouço População--Conceito--Contexto (PCC)~\cite{Arksey2005,Tricco2018}:
-\begin{itemize}
-    \item \textbf{População (P):} indivíduos monitorados quanto a variações de estados cognitivos, atencionais, afetivos ou de engajamento em contextos operacionais, clínicos, psicológicos, pedagógicos ou de reabilitação;
-    \item \textbf{Conceito (C):} construção, validação ou uso de biomarcadores neurofisiológicos quantitativos (predominantemente EEG) acoplados a modelos preditivos/decodificadores em sistemas pBCI;
-    \item \textbf{Contexto (C):} aplicações ecológicas ou semi-ecológicas, neuroergonomia, pedagogia/aprendizagem, psicologia cognitiva, reabilitação e interação humano-computador adaptativa (\textit{closed-loop}).
-\end{itemize}
-
-A unidade de análise é a publicação individual (\textit{full paper}). O escopo complementa revisões prévias do grupo~\cite{Faria2026} ao focar explicitamente no paradigma passivo e na cadeia biomarcador--validação--interpretabilidade, em vez de integração BCI--FES ou controle motor explícito.
+Esta revisão de escopo foi conduzida conforme PRISMA-ScR~\cite{Tricco2018}, com protocolo, critérios de elegibilidade e estratégia de busca definidos \textit{a priori}. O escopo foi delimitado pelo arcabouço População--Conceito--Contexto (PCC)~\cite{Arksey2005,Tricco2018}. A população compreende indivíduos monitorados quanto a variações de estados cognitivos, atencionais, afetivos ou de engajamento em contextos operacionais, clínicos, psicológicos, pedagógicos ou de reabilitação. O conceito abrange construção, validação ou uso de biomarcadores neurofisiológicos quantitativos, predominantemente baseados em EEG, acoplados a modelos preditivos em sistemas pBCI. O contexto inclui aplicações ecológicas ou semi-ecológicas, neuroergonomia, pedagogia, psicologia cognitiva, reabilitação e interação humano-computador adaptativa. A unidade de análise é a publicação individual. O escopo complementa revisões prévias do grupo~\cite{Faria2026} ao focar explicitamente no paradigma passivo e na cadeia biomarcador--validação--interpretabilidade.
 
 \subsection{Estratégia de busca}
 
-Duas bases eletrônicas foram consultadas até 20 de março de 2026: \textbf{OpenAlex}, pela cobertura bibliográfica ampla e interdisciplinar; e \textbf{PubMed}, pela cobertura clínica e biomédica. A seleção de bases seguiu critério de complementaridade semelhante ao adotado em revisão PRISMA-ScR anterior do grupo~\cite{Faria2026}, adaptada ao domínio pBCI e biomarcadores.
-
-A string de busca combinou quatro blocos booleanos (\texttt{AND} entre blocos, \texttt{OR} intra-bloco), derivados dos eixos PCC e dos termos recorrentes na literatura de referência~\cite{Arico2017,Lotte2018}:
-\begin{enumerate}
-    \item \textbf{pBCI:} \texttt{``passive BCI''}, \texttt{``passive brain-computer''}, \texttt{pBCI}, \texttt{``implicit BCI''};
-    \item \textbf{biomarcador quantitativo:} \texttt{biomarker}, \texttt{spectral}, \texttt{``engagement index''}, \texttt{``EEG feature''}, \texttt{quantitative};
-    \item \textbf{validação:} \texttt{validation}, \texttt{reliability}, \texttt{validity}, \texttt{``cross-validation''};
-    \item \textbf{domínio de aplicação:} \texttt{education}, \texttt{learning}, \texttt{pedagog}, \texttt{classroom}, \texttt{rehabilitation}, \texttt{psychology}, \texttt{``human-computer''}.
-\end{enumerate}
-
-Não foi imposta restrição de idioma. O período de elegibilidade foi janeiro de 2010 a 20 de março de 2026, alinhado ao critério temporal I4 empregado em~\cite{Faria2026}. A busca foi executada programaticamente via APIs públicas (OpenAlex REST API; NCBI E-utilities para PubMed), com filtro de data aplicado na consulta e verificação pós-busca pelo ano de publicação. Os registros identificados foram exportados para biblioteca de referências (Zotero) e planilha de triagem. A string completa e \textit{logs} de execução estão disponíveis mediante solicitação aos autores.
+Duas bases eletrônicas foram consultadas até 20 de março de 2026: OpenAlex, pela cobertura bibliográfica ampla e interdisciplinar, e PubMed, pela cobertura clínica e biomédica. A busca combinou termos relacionados a interfaces passivas, biomarcadores quantitativos, validação e domínios de aplicação (educação, aprendizagem, reabilitação, psicologia e interação humano-computador). Não foi imposta restrição de idioma. O período de elegibilidade foi janeiro de 2010 a 20 de março de 2026. A busca foi executada via APIs públicas, com filtro de data na consulta e verificação pós-busca; os registros foram exportados para biblioteca de referências e planilha de triagem. A string completa está disponível mediante solicitação aos autores.
 
 \subsection{Critérios de inclusão e exclusão}
 
-Estudos foram incluídos na pré-seleção quando, no título ou resumo, atendiam \textbf{simultaneamente} a:
-\begin{description}
-    \item[I1] menção explícita a pBCI ou equivalente implícito (\textit{passive/implicit brain--computer interface});
-    \item[I2] reporte de biomarcador neurofisiológico quantitativo \textbf{ou} procedimento de validação/construção de estimador (p.ex., confiabilidade, validade de critério, validação cruzada, \textit{ground truth});
-    \item[I3] pontuação de relevância $\geq 5$ na triagem estruturada (Seção~\ref{sec:triagem});
-    \item[I4] publicação entre janeiro/2010 e 20/março/2026 como artigo completo.
-\end{description}
+Estudos foram incluídos na pré-seleção quando, no título ou resumo, atendiam simultaneamente a: (I1) menção explícita a pBCI ou equivalente implícito; (I2) reporte de biomarcador neurofisiológico quantitativo ou procedimento de validação ou construção de estimador; (I3) pontuação de relevância igual ou superior a 5 na triagem estruturada; e (I4) publicação entre janeiro de 2010 e 20 de março de 2026 como artigo completo.
 
-Estudos foram excluídos quando:
-\begin{description}
-    \item[E1] não mencionavam pBCI ou equivalente no título/resumo;
-    \item[E2] não reportavam biomarcador quantitativo nem procedimento de validação;
-    \item[E3] tratavam predominantemente de BCI ativo, \textit{motor imagery}, prótese/exoesqueleto/\textit{speller}, epilepsia/crise como foco exclusivo, ou modalidades exclusivamente fNIRS/fMRI/MRI sem EEG;
-    \item[E4] apresentavam pontuação abaixo do limiar de relevância;
-    \item[E5] eram revisões, editoriais, protocolos sem dados, simulações exclusivas ou resumos de conferência sem texto integral.
-\end{description}
+Estudos foram excluídos quando: (E1) não mencionavam pBCI ou equivalente; (E2) não reportavam biomarcador quantitativo nem procedimento de validação; (E3) tratavam predominantemente de BCI ativo, \textit{motor imagery}, prótese, exoesqueleto ou \textit{speller}, epilepsia como foco exclusivo, ou modalidades exclusivamente fNIRS, fMRI ou MRI sem EEG; (E4) apresentavam pontuação abaixo do limiar; ou (E5) eram revisões, editoriais, protocolos sem dados ou resumos sem texto integral. Estudos exclusivamente fNIRS, como perspectivas metodológicas sem EEG, permanecem registrados na triagem preliminar, mas serão reavaliados na leitura integral quanto à aderência ao escopo EEG-centrado. A confirmação final de elegibilidade requer leitura integral.
 
-A confirmação final de elegibilidade requer leitura integral do texto (Seção~\ref{sec:triagem}).
+\subsection{Triagem e extração de dados}
 
-\subsection{Triagem, deduplicação e extração de dados}
-\label{sec:triagem}
+Registros brutos foram deduplicados por DOI normalizado e similaridade de título (limiar de 90\%). Títulos e resumos foram triados em duas camadas: regras determinísticas (I1--I4, E1--E5) e dicionário ponderado de termos calibrado a partir de Aricò \textit{et al.}~\cite{Arico2017} e dos domínios PCC. Registros com pontuação total $\geq 5$ e sem penalidade determinante foram classificados como pré-incluídos. A decisão definitiva cabe à leitura integral, com citação \textit{verbatim} para campos sujeitos a interpretação~\cite{Faria2026}.
 
-\textbf{Deduplicação.} Registros brutos das bases foram deduplicados em duas etapas: (i)~por DOI normalizado; (ii)~por similaridade de título ($\geq 90\%$, \textit{fuzzy matching}), preservando o registro mais completo.
+Para estudos pré-incluídos, dados foram extraídos mediante formulário padronizado com vocabulário fechado: identificação, população e desenho, \textit{setup} experimental (dispositivo, canais, taxa de amostragem), domínio de \textit{features}, construção do biomarcador, algoritmo de decodificação, validação, \textit{ground truth}, domínio de aplicação e aspectos de IHC. Campos não reportados explicitamente foram codificados como NR (\textit{not reported}).
 
-\textbf{Triagem por título e resumo.} Adotou-se triagem em duas camadas. Primeiro, regras determinísticas de inclusão/exclusão (I1--I4, E1--E5). Em seguida, um \textbf{dicionário ponderado de termos} --- calibrado a partir dos eixos metodológicos de Aricò \textit{et al.}~\cite{Arico2017} e dos domínios PCC --- atribuiu pontos a padrões textuais no título e resumo concatenados:
-\begin{itemize}
-    \item \textit{Passive BCI} (obrigatório): p.ex., \texttt{passive BCI}, \texttt{pBCI}, \texttt{implicit BCI};
-    \item \textit{Biomarcador}: p.ex., razão beta/alfa, potência espectral, índice de engajamento, \textit{EEG feature};
-    \item \textit{Validação}: p.ex., \textit{reliability}, \textit{cross-validation}, \textit{ground truth}, validade ecológica;
-    \item \textit{Domínio}: pedagogia (peso maior), reabilitação, psicologia, IHC, neuroergonomia;
-    \item \textit{Penalidades de exclusão}: p.ex., \textit{motor imagery}, \textit{active BCI}, modalidade exclusivamente fMRI/fNIRS.
-\end{itemize}
+\subsection{Critérios de classificação}
 
-Registros com pontuação total $\geq 5$ e sem penalidade determinante ($\leq -6$) foram classificados como \textbf{INCLUÍDO (Pré-seleção)}; os demais, \textbf{EXCLUÍDO}, com motivo registrado. A triagem automatizada funciona como filtro de sensibilidade; a decisão definitiva cabe à avaliação do texto integral por pelo menos um revisor, com citação \textit{verbatim} para campos sujeitos a interpretação --- prática alinhada à mitigação de viés de revisor único adotada em~\cite{Faria2026}.
-
-\textbf{Extração de dados.} Para estudos pré-incluídos, formulário padronizado com vocabulário fechado registra: identificação; população e desenho; modalidade e canais EEG; domínio de \textit{features} (temporal/espectral/espacial/conectividade); algoritmo de decodificação; procedimentos de construção do biomarcador (normalização, janela temporal, índice composto); validação (tipo de CV, confiabilidade, AUC/ROC); \textit{ground truth}; domínio de aplicação; aspectos de IHC (\textit{closed-loop}, calibração, interpretabilidade); e transferibilidade entre contextos (p.ex., reabilitação $\rightarrow$ pedagogia). Campos não reportados explicitamente são codificados ``NR'' (\textit{not reported}); inferência não é permitida.
-
-\textbf{Prioridade pedagógica.} Estudos pré-incluídos recebem classificação auxiliar: \textbf{Alta} (pedagogia explícita), \textbf{Média} (psicologia/IHC/aprendizagem genérica) ou \textbf{Baixa} (reabilitação, neuroergonomia ou domínio indeterminado), para orientar síntese narrativa sem substituir critérios de inclusão.
-
-\subsection{Critérios de classificação analítica}
-
-Para reduzir subjetividade na síntese, campos categóricos seguem regras explícitas, adaptadas de~\cite{Faria2026}:
-\begin{itemize}
-    \item \textbf{Domínio de \textit{feature}:} temporal (ERP/MRCP), espectral (bandas ou razões), espacial (CSP, filtros espaciais), conectividade (coerência, PLV, grafo), híbrido ou NR;
-    \item \textbf{Família de classificador:} linear (LDA, regressão), kernel (SVM), Riemanniano, \textit{deep learning}, limiar/heurístico ou NR;
-    \item \textbf{Rigor de validação:} adequado (CV sensível a dependência temporal ou validação externa), parcial (CV padrão sem controle temporal), insuficiente (treino/teste único ou NR);
-    \item \textbf{Interpretabilidade:} mapa direto, transformação de pesos (p.ex.,~\cite{Haufe2014}), não abordada ou NR.
-\end{itemize}
+Campos categóricos seguiram regras explícitas adaptadas de~\cite{Faria2026}. O domínio de \textit{feature} foi classificado como temporal, espectral, espacial, conectividade, topologia de rede, híbrido ou NR. A família de classificador foi codificada como linear, kernel, ensemble, \textit{deep learning} ou NR. O rigor de validação foi classificado como adequado (validação cruzada sensível a dependência temporal ou validação externa), parcial (validação cruzada padrão) ou insuficiente (partição única ou NR).
 
 \section{Resultados}
 
 \subsection{Seleção de estudos}
 
-As buscas identificaram 86 registros brutos (OpenAlex: 80; PubMed: 6). Após deduplicação, restaram 82 registros únicos triados por título e resumo; 69 foram excluídos e 13 pré-selecionados para leitura integral e extração completa (Fig.~\ref{fig:prisma}). Os motivos de exclusão na triagem automatizada incluíram ausência de pBCI explícito, ausência simultânea de biomarcador e validação, escopo incompatível (BCI ativo/\textit{motor imagery}) e pontuação abaixo do limiar.
+As buscas identificaram 86 registros brutos (OpenAlex: 80; PubMed: 6). Após deduplicação, restaram 82 registros únicos; 69 foram excluídos na triagem por título e resumo e 13 pré-selecionados para leitura integral (Fig.~\ref{fig:prisma}).
 
 \begin{figure}[ht]
   \centering
   \fbox{\parbox{0.92\linewidth}{\centering\vspace{2.2cm}
-  \textbf{Figura 1} --- Fluxograma PRISMA-ScR (rascunho).\\
-  Identificados: 86 \ $\rightarrow$ Únicos: 82 \ $\rightarrow$ Pré-incluídos: 13\\
-  \textit{[Inserir figura final]} \vspace{2.2cm}}}
-  \caption{Fluxograma de seleção de estudos (PRISMA-ScR).}
+  \textit{[Inserir fluxograma PRISMA-ScR]} \vspace{2.2cm}}}
+  \caption{Fluxograma de seleção de estudos (PRISMA-ScR). Identificados: 86; únicos: 82; pré-incluídos: 13.}
   \label{fig:prisma}
 \end{figure}
 
-\subsection{Características preliminares do corpus pré-selecionado}
+\subsection{Características preliminares do corpus}
 
-A Tabela~\ref{tab:resumo} resume distribuições preliminares entre os 13 estudos pré-incluídos. A leitura integral confirmará ou revisará cada classificação.
+Entre os 13 estudos pré-selecionados, oito (62\%) receberam prioridade pedagógica alta, um (8\%) média e quatro (31\%) baixa (Tabela~\ref{tab:resumo}). Oito estudos (62\%) foram classificados como pedagogia na triagem automatizada; os demais distribuíram-se entre psicologia, reabilitação, neuroergonomia e indeterminado.
 
-\begin{table*}[ht]
+\begin{table}[ht]
   \centering
-  \caption{Características preliminares dos 13 estudos pré-selecionados (triagem título/resumo).}
+  \caption{Características preliminares dos 13 estudos pré-selecionados.}
   \label{tab:resumo}
   \small
   \begin{tabular}{@{}lrr@{}}
     \toprule
-    \textbf{Característica} & \textbf{Categoria} & \textbf{$n$ (\%)} \\
+    Característica & Categoria & $n$ (\%) \\
     \midrule
     \multirow{3}{*}{Prioridade pedagógica} & Alta & 8 (62) \\
      & Média & 1 (8) \\
      & Baixa & 4 (31) \\
     \midrule
-    \multirow{5}{*}{Domínio principal (triagem)} & Pedagogia & 8 (62) \\
+    \multirow{5}{*}{Domínio principal} & Pedagogia & 8 (62) \\
      & Psicologia & 1 (8) \\
      & Reabilitação & 1 (8) \\
      & Neuroergonomia & 1 (8) \\
      & Indeterminado & 2 (15) \\
     \bottomrule
   \end{tabular}
-\end{table*}
+\end{table}
 
-\subsection{Síntese individual dos estudos}
+\subsection{Síntese de estudos ilustrativos}
 
-A Tabela~\ref{tab:estudos} apresenta o esquema de extração por estudo, alinhado à matriz PRISMA do projeto. Linhas completas serão preenchidas após leitura integral; campos seguem vocabulário fechado (NR quando não reportado).
+A leitura integral iniciou-se pelos estudos de maior aderência ao escopo e relevância metodológica. Arif \textit{et al.}~\cite{Arif2023} desenvolveram esquema pBCI para detecção precoce de sonolência ao volante com doze homens saudáveis, destros, com média de idade de $30 \pm 2$ anos e experiência mínima de dois anos de condução. O \textit{setup} experimental combinou simulador veicular, privação de sono e coleta por volta das 03h00, com tarefa de manutenção de faixa (\textit{lane-keeping}) por $30 \pm 2$ minutos em ambiente escuro e silencioso; o \textit{ground truth} contrastou estados de alerta e sonolência a partir de gravações comportamentais e de desempenho. O EEG foi adquirido com \textit{headset} OpenBCI Ultracortex Mark-IV em montagem referencial (referências nos lóbulos das orelhas), 16 canais a 125~Hz, com análise focada em seis derivações pré-frontais, frontais e occipitais (Fp1, Fp2, F7, F8, O1, O2). As \textit{features} espectrais incluíram potências médias de $\delta$, $\theta$, $\alpha$ e $\beta$ em janelas de 10~s (PSD via Welch) e quatro razões espectrais ($R_1 = (\alpha+\theta)/\beta$; $R_2 = \alpha/\beta$; $R_3 = (\alpha+\theta)/(\alpha+\beta)$; $R_4 = \theta/\beta$), capturando a transição alerta$\rightarrow$sonolência como migração de potência de $\beta$ para $\alpha$ e ondas lentas. Sete famílias de classificadores foram comparadas canal a canal; o canal F8 (córtex frontal direito) superou os demais com \textit{ensemble bagged trees} (acurácia 85{,}6\%, recall 89{,}7\%, F1 87{,}6\%, AUC 0{,}91), com significância estatística por ANOVA bidirecional e testes $t$ pareados com Bonferroni ($p < 0{,}01$). Esse estudo exemplifica \textit{pipeline} espectral completo --- aquisição, seleção de centro de interesse (COI), decodificação e validação estatística --- aplicável à neuroergonomia veicular.
+
+Rutkowski \textit{et al.}~\cite{Rutkowski2023} reportaram estudo piloto de pBCI baseado em EEG para prognóstico de comprometimento cognitivo leve (CCL; MoCA $\leq 25$) em 27 idosos poloneses (média $70{,}76 \pm 5{,}34$ anos). Três tarefas cognitivas --- aprendizagem e avaliação de emoções faciais em vídeos curtos e \textit{oddball} com imagens de interiores reminiscentes da infância --- avaliaram declínio de memória de trabalho em contexto de envelhecimento saudável \textit{versus} CCL. O EEG foi coletado com \textit{headset} Unicorn (g.tec), com remoção de artefatos oculares e musculares. Em vez de razões espectrais, os autores aplicaram topologia de rede por redes de partição ordinal (OPN) sobre séries temporais de EEG, quantificando contagens de nós e arestas por canal; \textit{features} foram reduzidas por UMAP e classificadas em validação cruzada \textit{leave-one-subject-out} com LR, LDA, SVM linear, \textit{random forest} e rede neural. Participantes com envelhecimento cognitivo saudável apresentaram contagens de nós e arestas significativamente maiores que o grupo CCL ($p \ll 0{,}01$), com acurácias médias entre 82\% e 95\% conforme a tarefa. O trabalho ilustra biomarcador de conectividade/topologia para monitoramento domiciliar de intervenções cognitivas, embora limitado por amostra pequena, desbalanceamento de classes e participação majoritariamente feminina.
+
+Boas \textit{et al.}~\cite{Boas2020} não reportam estudo empírico pBCI com EEG, mas articulam perspectiva metodológica relevante à validade de decodificadores em modalidades hemodinâmicas. O artigo argumenta que \textit{pipelines} fNIRS para BCI passivo frequentemente ignoram o Modelo Linear Geral (GLM) com regressores de curta separação (SS), prática consolidada em neuroimagem funcional. A integração do GLM dentro da validação cruzada --- e não como pré-processamento global --- permite estimar a resposta hemodinâmica evocada (HRF) por canal enquanto remove interferência fisiológica superficial, gerando \textit{features} (pesos $\beta$ da HRF) com maior separabilidade; em dados simulados com \textit{ground truth}, a abordagem GLM+SS elevou acurácia em média 7{,}4\% em relação ao pré-processamento convencional. Para revisões EEG-centradas, o estudo funciona como contraponto metodológico: reforça que validação cruzada mal especificada e limpeza de sinal fora do \textit{fold} produzem vazamento de informação e métricas infladas --- lição transferível ao domínio espectral EEG, embora a modalidade e o escopo do presente review permaneçam centrados em EEG.
+
+A Tabela~\ref{tab:estudos} resume campos de extração para estudos com leitura integral iniciada; demais linhas serão completadas conforme avanço da revisão.
 
 \begin{table*}[ht]
   \centering
-  \caption{Esquema de síntese individual dos estudos incluídos (a preencher após leitura integral).}
+  \caption{Síntese parcial dos estudos com leitura integral iniciada.}
   \label{tab:estudos}
   \scriptsize
-  \begin{tabular}{@{}p{2.1cm}p{3.2cm}p{1.2cm}p{1.5cm}p{2.0cm}p{2.0cm}p{1.8cm}p{1.8cm}p{1.6cm}@{}}
+  \begin{tabular}{@{}p{1.8cm}p{2.2cm}p{0.7cm}p{1.5cm}p{2.0cm}p{1.6cm}p{1.5cm}p{1.4cm}@{}}
     \toprule
-    \textbf{Autor (ano)} & \textbf{Título (abrev.)} & \textbf{$n$} & \textbf{Canais EEG} & \textbf{Biomarcador} & \textbf{Validação} & \textbf{Classificador} & \textbf{Ground truth} & \textbf{Domínio} \\
+    Autor (ano) & Estado mental & $n$ & Canais / equip. & Biomarcador & Validação & Classificador & Domínio \\
     \midrule
-    Aricò (2017) & pBCI operacional: mini-revisão & NR & NR & Espectral, ERP, conectividade & Revisão narrativa & Linear, kernel & NR & Neuroergonomia \\
-    -- & Engajamento em MOOC & NR & NR & Índice de engajamento & NR & NR & NR & Pedagogia \\
-    -- & CV e métricas pBCI & NR & NR & NR & Cross-validation & NR & NR & Pedagogia \\
-    -- & Sonolência ao volante (razões espectrais) & NR & NR & $R_1$--$R_4$ espectrais & NR & NR & NR & Pedagogia \\
-    \multicolumn{9}{c}{\textit{Demais linhas: preencher a partir de \texttt{Matriz\_Mapeamento\_PRISMA.xlsx}}} \\
+    Arif (2023) & Sonolência vs.\ alerta & 12 & Fp1/Fp2/F7/F8/O1/O2; OpenBCI 125~Hz & PSD Welch; $R_1$--$R_4$ & ANOVA; $t$ pareado; AUC & Ensemble; comparação 7 famílias & Neuroergonomia \\
+    Rutkowski (2023) & CCL vs.\ cognição saudável & 27 & Unicorn EEG (g.tec) & Topologia OPN (nós/arestas) & LOOS-CV & LR, LDA, SVM, RF, DFNN & Clínico / domiciliar \\
+    Boas (2020) & Perspectiva metodológica & --- & fNIRS CW7; 48+8 canais & Peso $\beta$ HRF (GLM+SS) & CV aninhada; simulação & Classificação binária & Fora do escopo EEG \\
     \bottomrule
   \end{tabular}
 \end{table*}
 
-\textbf{Campos recomendados para a tabela final} (espelhando CBEB~\cite{Faria2026} e a matriz do projeto):
-\begin{enumerate}
-    \item identificação (autor, ano, DOI);
-    \item desenho, $n$ participantes, população;
-    \item paradigma pBCI e contexto ecológico;
-    \item canais EEG e bandas/\textit{features};
-    \item construção do biomarcador (normalização, janela, índice composto);
-    \item algoritmo de decodificação e calibração;
-    \item validação (tipo de CV, métricas, confiabilidade);
-    \item \textit{ground truth} (desempenho, autorrelato, outcome clínico/pedagógico);
-    \item domínio, aplicação pedagógica, aspectos IHC e transferibilidade.
-\end{enumerate}
+\section{Discussão}
 
-\section{Discussão (rascunho)}
+A leitura preliminar confirma heterogeneidade substancial no corpus pBCI: enquanto Arif \textit{et al.}~\cite{Arif2023} exemplificam biomarcador espectral univariado com seleção espacial explícita (F8), Rutkowski \textit{et al.}~\cite{Rutkowski2023} avançam para \textit{features} multivariadas de topologia de rede e validação \textit{leave-one-subject-out}, alinhada à generalização interindividual. Ambos reforçam a necessidade de reportar \textit{setup} experimental completo --- dispositivo, montagem, canais analíticos, taxa de amostragem, janela temporal e critério de rotulagem ---, lacuna também documentada em revisões de BCI motor~\cite{Faria2026}. O contraste com Boas \textit{et al.}~\cite{Boas2020} evidencia que boa parte dos desafios de validade não é exclusiva do EEG: vazamento por pré-processamento global e confusão entre atividade neural e ruído sistemático aparecem em fNIRS e EEG, embora soluções específicas (GLM+SS \textit{versus} filtragem espectral e controle de dependência temporal) difiram por modalidade.
 
-\subsection{Síntese narrativa esperada}
-
-Com base nas anotações preliminares e na literatura de referência~\cite{Arico2017,Haufe2014,Lotte2018}, espera-se que a síntese final organize achados nos eixos:
-\begin{itemize}
-    \item \textbf{Neurometrics e domínios de \textit{feature}:} predominância espectral (teta, alfa, beta, razões como $\alpha/\beta$, $(\alpha+\theta)/\beta$) frente a ERPs (P300, ERN) e conectividade; comparação com a concentração sensorimotora (C3/C4/Cz) observada em revisões de BCI motor~\cite{Faria2026};
-    \item \textbf{Aprendizado de máquina:} trade-off viés--variância; adequação de modelos lineares regularizados em calibração escassa versus kernels e \textit{deep learning} em amostras maiores~\cite{Arico2017,Lotte2018};
-    \item \textbf{Validação e calibração:} generalização entre tarefas (p.ex., \textit{n-back} vs.\ condução), deriva intersessão e necessidade de readaptação online~\cite{Arico2016ATM,Varoquaux2017};
-    \item \textbf{Interpretabilidade:} distinção entre pesos discriminativos e padrões de ativação forward~\cite{Haufe2014};
-    \item \textbf{Lacunas:} reportagem de Fp1/Fp2, validação ecológica em pedagogia, e \textit{pipelines} reprodutíveis ponta a ponta.
-\end{itemize}
-
-\subsection{Trabalhos futuros}
-
-A consolidação desta revisão em manual metodológico --- com \textit{pipelines} exemplares por domínio (espectral, temporal, espacial/Riemanniano) e guia de escolha de classificador condicionado ao volume de calibração e ao SNR --- permanece como extensão natural, condicionada à maturação empírica dos estudos incluídos.
+A consolidação desta revisão em manual metodológico comparando arquiteturas completas de aprendizado de máquina --- desde extração espectral até ensembles, redes profundas e interpretação de pesos~\cite{Haufe2014,Lotte2018} --- permanece como extensão deliberada, condicionada à conclusão da extração sistemática dos 13 estudos pré-incluídos. O presente manuscrito prioriza, nesta fase, o mapeamento reprodutível de biomarcadores, \textit{setups} e práticas de validação que sustentam decisões de projeto em pBCI aplicada.
 
 \section*{Agradecimentos}
 
-% Inserir financiamento (CAPES, FAPEMIG, etc.) conforme CBEB.
+% Inserir financiamento (CAPES, FAPEMIG, etc.).
 
 \bibliographystyle{sbc}
 \bibliography{referencias}

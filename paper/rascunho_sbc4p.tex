@@ -1,0 +1,73 @@
+\documentclass[12pt]{article}
+
+\usepackage{sbc-template}
+\usepackage{graphicx,url}
+\usepackage[utf8]{inputenc}
+\usepackage[brazil]{babel}
+\usepackage{cite}
+\usepackage{booktabs}
+
+\sloppy
+
+\title{Brilho Eterno de uma Mente Mensurável: Mapeando Biomarcadores e Estimadores de Estados Mentais em pBCI}
+
+\author{Felippe Veloso Marinho\inst{1}\thanks{ORCID: \url{https://orcid.org/0009-0003-6910-9143}},
+        Coautor(a) do Trabalho\inst{1}}
+
+\address{Escola de Engenharia\\
+  Universidade Federal de Minas Gerais (UFMG) -- Belo Horizonte, MG -- Brasil\\
+  \email{felippevm@ufmg.br}}
+
+\begin{document}
+
+\maketitle
+
+\begin{abstract}
+We scoped the pBCI literature (PRISMA-ScR; OpenAlex and PubMed, 2010--2026) for quantitative EEG biomarkers and validation practices. Of 82 unique records, 13 were pre-selected. Two methodological threads emerge from preliminary synthesis: (i) the gap between classifier recommendations (Aricò et al.) and neurophysiological interpretability of linear weights (Haufe et al.); (ii) transferable centre-of-interest protocols for spatial localization, exemplified by frontal-channel drowsiness detection (Arif et al.). Full extraction matrix available from the authors.
+\end{abstract}
+
+\begin{resumo}
+Mapeamos a literatura pBCI (PRISMA-ScR; OpenAlex e PubMed, 2010--2026) quanto a biomarcadores EEG quantitativos e validação. Dos 82 registros únicos, 13 foram pré-selecionados. Dois eixos metodológicos emergem da síntese preliminar: (i) a lacuna entre recomendações de classificadores (Aricò \textit{et al.}) e interpretabilidade neurofisiológica de pesos lineares (Haufe \textit{et al.}); (ii) protocolos transferíveis de localização de centro de interesse (COI), exemplificados pela detecção de sonolência em F8 (Arif \textit{et al.}). Matriz completa de extração disponível mediante solicitação.
+\end{resumo}
+
+\section{Introdução}
+
+Interfaces cérebro-computador passivas (pBCIs) inferem estados cognitivos e afetivos implícitos a partir do EEG sem comandos voluntários explícitos~\cite{Arico2017,Zander2016}, com aplicações em condução veicular, neuroergonomia, pedagogia e monitoramento clínico~\cite{Arif2023,Rutkowski2023}. Aricò \textit{et al.}~\cite{Arico2017} sistematizaram neurometrics, \textit{features} espectrais e temporais e recomendações de aprendizado de máquina, mas não tratam de forma equivalente a interpretação neurofisiológica dos parâmetros dos classificadores lineares que recomendam --- lacuna analítica posteriormente formalizada por Haufe \textit{et al.}~\cite{Haufe2014}.
+
+Paralelamente, revisões PRISMA-ScR em BCI motor documentam concentração de canais em C3, C4 e Cz e escassa reportagem frontopolar~\cite{Faria2026}. Este manuscrito, procedimento metodológico adaptado desse precedente (não recuperado pela busca, por focar BCI--FES ativo), mapeia o paradigma passivo e pergunta: quais biomarcadores e práticas de validação são reportados, e quais protocolos permitem localizar derivações informativas para novos estados mentais? A contribuição argumentativa centra-se em dois eixos --- interpretabilidade (R2) e localização de COI (caso Arif 2023) ---; a matriz completa dos 13 estudos e o manual de arquiteturas ML permanecem como produto complementar.
+
+\section{Métodos}
+
+Revisão de escopo conforme PRISMA-ScR~\cite{Tricco2018} e PCC~\cite{Arksey2005}. Buscamos OpenAlex e PubMed (jan/2010--mar/2026) com termos de pBCI, biomarcador quantitativo, validação e domínios de aplicação (educação, reabilitação, psicologia, IHC). Registros foram deduplicados (DOI e título), triados por critérios I/E e pontuação estruturada; 13 pré-incluídos para leitura integral (Fig.~\ref{fig:prisma}). Incluímos quando (I1) pBCI explícito, (I2) biomarcador ou validação reportados, (I3) pontuação $\geq 5$, (I4) artigo completo no período; excluímos BCI ativo, \textit{motor imagery} e estudos fora do escopo EEG-centrado (E1--E5). Separamos \textit{corpus primário} (contagens PRISMA) de \textit{literatura de referência}: Haufe \textit{et al.}~\cite{Haufe2014} (interpretabilidade) e Faria \textit{et al.}~\cite{Faria2026} (precedente metodológico PRISMA, manuscrito em preparação). Extração com vocabulário fechado (NR quando não reportado); interpretabilidade classificada conforme Haufe \textit{et al.}
+
+\section{Resultados}
+
+Identificamos 86 registros (82 únicos); 13 pré-selecionados (Fig.~\ref{fig:prisma}). A leitura integral iniciada confirma heterogeneidade de \textit{features} (espectral, topologia de rede) e de validação. Arif \textit{et al.}~\cite{Arif2023} reportam sonolência veicular ($n=12$) com razões espectrais e COI em F8 (AUC 0{,}91); Rutkowski \textit{et al.}~\cite{Rutkowski2023} reportam CCL ($n=27$) com topologia OPN e validação \textit{leave-one-subject-out}. Detalhes tabulares dos 13 estudos constam na matriz suplementar.
+
+\begin{figure}[ht]
+  \centering
+  \fbox{\parbox{0.85\linewidth}{\centering\vspace{1.2cm}\small
+  PRISMA-ScR: 86 identificados $\rightarrow$ 82 únicos $\rightarrow$ 13 pré-incluídos
+  \vspace{1.2cm}}}
+  \caption{Seleção de estudos (fluxograma completo disponível como material suplementar).}
+  \label{fig:prisma}
+\end{figure}
+
+\section{Discussão}
+
+\textbf{Interpretabilidade.} Aricò \textit{et al.}~\cite{Arico2017} orientam \textit{qual} classificador empregar em pBCI (lineares regularizados quando a calibração é escassa); Haufe \textit{et al.}~\cite{Haufe2014} orientam \textit{o que concluir} a partir de seus pesos. Estudos do corpus --- como Arif \textit{et al.}~\cite{Arif2023}, que comparam LDA, regressão logística e \textit{ensembles} canal a canal --- produzem coeficientes que não devem ser lidos como mapas de ativação cortical sem transformação \textit{forward}. Incorporar R2 como critério de extração distingue revisões que apenas catalogam algoritmos daquelas que avaliam rigor interpretativo.
+
+\textbf{Localização de COI.} Arif \textit{et al.}~\cite{Arif2023} exemplificam protocolo transferível: \textit{setup} ecológico credível, hipótese topográfica (seis derivações pré-frontais/frontais/occipitais), \textit{features} espectrais (Welch, razões $R_1$--$R_4$), classificadores treinados \textit{por canal}, comparação estatística entre derivações e fixação de COI (F8) com um eletrodo. Enquanto BCI motor concentra C3/C4/Cz~\cite{Faria2026}, estados passivos (sonolência, engajamento, \textit{workload}, atenção em sala de aula) provavelmente recrutam topografias distintas, subreportadas quando se replica montagem sensorimotora por convenção. Generalizar esse fluxo --- hipótese anatômica, extração, comparação intercanal, COI validado --- é a principal implicação prática desta revisão para novos biomarcadores, independentemente do estado mental alvo.
+
+\section*{Material suplementar}
+
+Matriz PRISMA completa (13 estudos), string de busca, \textit{notebook} de triagem e fluxograma detalhado: repositório do projeto e solicitação aos autores.
+
+\section*{Agradecimentos}
+
+% CAPES, FAPEMIG.
+
+\bibliographystyle{sbc}
+\bibliography{referencias}
+
+\end{document}
